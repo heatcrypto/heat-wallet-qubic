@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "es2020",              // Compile to a version of ECMAScript that supports async/await
+    "module": "esnext",              // Use ESNext as module system (for use with bundlers)
+    "moduleResolution": "node",      // Module resolution strategy to mimic Node.js
+    "outDir": "./dist",              // Redirect output structure to the directory
+    "rootDir": "./src",              // Specify the root directory of input files
+    "esModuleInterop": true,         // Enables compatibility with Babel-imported CommonJS modules
+    "forceConsistentCasingInFileNames": true, // Disallow inconsistently-cased references to the same file
+    "strict": true,                  // Enable all strict type-checking options
+    "noImplicitAny": true,           // Raise error on expressions and declarations with an implied 'any' type
+    "noImplicitReturns": true,       // Report error when not all code paths in function return a value
+    "noImplicitThis": true,          // Raise error on 'this' expressions with an implied 'any' type
+    "noUnusedLocals": true,          // Report errors on unused locals
+    "noUnusedParameters": true,      // Report errors on unused parameters
+    "declaration": true,             // Generate corresponding '.d.ts' file
+    "sourceMap": true,               // Generates corresponding '.map' file
+    "lib": ["es2020", "dom"],        // List of library files to be included in the compilation
+    "resolveJsonModule": true,       // Include modules imported from .json files
+    "skipLibCheck": true,            // Skip type checking of all declaration files (*.d.ts)
+    "incremental": true              // Enable incremental compilation by creating a .tsbuildinfo file
+  },
+  "include": [
+    "src/**/*.ts"  // Include all TypeScript files in src and subdirectories
+  ],
+  "exclude": [
+    "node_modules",  // Exclude the node_modules directory
+    "dist"           // Exclude the dist directory
+  ]
+}
