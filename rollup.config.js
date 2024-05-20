@@ -8,14 +8,13 @@ export default {
       format: 'cjs',
       sourcemap: true
     },
-    {
-      file: 'dist/bundle.esm.js',
-      format: 'es',
-      sourcemap: true
-    }
+    // {
+    //   file: 'dist/bundle.esm.js',
+    //   format: 'es',
+    //   sourcemap: true
+    // }
   ],
   plugins: [
     typescript(),
   ],
-  // external: ['dependency-name']  // Add peer dependencies here
 };
