@@ -3,7 +3,7 @@
 Object.defineProperty(exports, '__esModule', { value: true });
 
 var qubicHelper$1 = require('qubic-ts-library/dist/qubicHelper');
-require('qubic-ts-library/dist/crypto/index');
+var crypto = require('qubic-ts-library/dist/crypto/index');
 var BigNumber = require('bignumber.js');
 var QubicDefinitions = require('qubic-ts-library/dist/QubicDefinitions');
 var PublicKey = require('qubic-ts-library/dist/qubic-types/PublicKey');
@@ -12,11 +12,25 @@ var QubicTransaction = require('qubic-ts-library/dist/qubic-types/QubicTransacti
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
+var crypto__default = /*#__PURE__*/_interopDefaultLegacy(crypto);
 var BigNumber__default = /*#__PURE__*/_interopDefaultLegacy(BigNumber);
 
 const qubicHelper = new qubicHelper$1.QubicHelper();
 // Assign a value to prevent rollup from too aggressively optimizing my code
 let cryptoUtil = {};
+/**
+ * Wallet code relies on synchronous functions for key derivation logic which is why
+ * GetAddress, GetPublicKey etc have to run synchronouslay and cant wait for
+ * the wasm to possibly have to be loaded.
+ * Calling code MUST await `qubicReady()` BEFORE they can use any code that
+ * relies on the wasm code.
+ */
+const qubicReady = async () => {
+    if (typeof cryptoUtil.K12 === "undefined") {
+        cryptoUtil = await crypto__default["default"];
+    }
+    return;
+};
 /**
  * Access method to get wasm related code, will throw when "qubicReady" was not called and
  * awaited prior to calling this method.
@@ -240,12 +254,15 @@ const privatekeyHexToQubicBase26Seed = (params) => {
 };
 
 exports.getAddressFromPublicKey = getAddressFromPublicKey;
+exports.getCryptoUtil = getCryptoUtil;
 exports.getIdentity = getIdentity;
 exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
 exports.isValidAddress = isValidAddress;
 exports.parseTransaction = parseTransaction;
 exports.privateKeyToPublicKey = privateKeyToPublicKey;
 exports.privatekeyHexToQubicBase26Seed = privatekeyHexToQubicBase26Seed;
+exports.qubicHelper = qubicHelper;
+exports.qubicReady = qubicReady;
 exports.seedToPrivateKey = seedToPrivateKey;
 exports.transferQubic = transferQubic;
 //# sourceMappingURL=bundle.cjs.js.map

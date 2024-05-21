@@ -24,7 +24,6 @@ export const parseTransaction = (params: {
     inputType,
     inputSize,
   } = parsedTxn;
-
   return {
     sourceIdentity,
     destinationIdentity,
