@@ -118,7 +118,7 @@ const uint8ArrayToHex = (array) => {
  * @param params
  * @returns {string}
  */
-const getPublicKeyFromPrivateKey = async (params) => {
+const getPublicKeyFromPrivateKey = (params) => {
     const { qubicBase26Seed } = params;
     const privateKey = seedToPrivateKey(qubicBase26Seed);
     const publicKey = privateKeyToPublicKey(privateKey);

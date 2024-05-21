@@ -5,6 +5,6 @@
  */
 export declare const getPublicKeyFromPrivateKey: (params: {
     qubicBase26Seed: string;
-}) => Promise<string>;
+}) => string;
 export declare function seedToPrivateKey(seed: string): Uint8Array;
 export declare function privateKeyToPublicKey(privateKey: Uint8Array): Uint8Array;

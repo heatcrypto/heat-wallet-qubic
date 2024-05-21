@@ -6,7 +6,7 @@ import { uint8ArrayToHex } from "./uint8array_to_hex";
  * @param params 
  * @returns {string}
  */
-export const getPublicKeyFromPrivateKey = async (params: {
+export const getPublicKeyFromPrivateKey = (params: {
   qubicBase26Seed: string;
 }) => {
   const { qubicBase26Seed } = params;
