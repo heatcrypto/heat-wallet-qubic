@@ -89,24 +89,6 @@ function getCheckSum(publicKey) {
     return checksum;
 }
 
-const base26Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const hexToBase26 = (hexString) => {
-    let hexNum = BigInt(`0x${hexString}`);
-    let base26Str = '';
-    while (hexNum > 0n) {
-        let remainder = hexNum % 26n;
-        hexNum = hexNum / 26n;
-        // Convert BigInt remainder to a number before using it as an index
-        base26Str = base26Chars[Number(remainder)] + base26Str;
-    }
-    return base26Str;
-};
-
-const padBase26String = (input) => {
-    const paddedString = input.padStart(55, 'Z');
-    return paddedString;
-};
-
 const uint8ArrayToHex = (array) => {
     let hexString = "";
     for (let i = 0; i < array.length; i++) {
@@ -123,18 +105,12 @@ const uint8ArrayToHex = (array) => {
  * @returns {string}
  */
 const getPublicKeyFromPrivateKey = async (params) => {
-    const { privateKeyHex } = params;
-    const privateKeyAsBase26 = hexToBase26(privateKeyHex);
-    const seed = padBase26String(privateKeyAsBase26);
-    const privateKey = seedToPrivateKey(seed);
+    const { qubicBase26Seed } = params;
+    const privateKey = seedToPrivateKey(qubicBase26Seed);
     const publicKey = privateKeyToPublicKey(privateKey);
     const publicKeyHex = uint8ArrayToHex(publicKey);
     return publicKeyHex;
 };
-function privateKeyHexToQubicSeed(privateKeyHex) {
-    const privateKeyAsBase26 = hexToBase26(privateKeyHex);
-    return padBase26String(privateKeyAsBase26);
-}
 function seedToPrivateKey(seed) {
     const { K12 } = getCryptoUtil();
     const privateKey = qubicHelper.privateKey(seed, 0, K12);
@@ -211,25 +187,15 @@ function parseUint8ArrayQubicTransaction(data) {
  * @param params
  */
 const transferQubic = async (params) => {
-    const { fromAddress, toAddress, value, key, tick } = params;
+    const { fromAddress, toAddress, value, qubicBase26Seed, tick } = params;
     const sourcePublicKey = new PublicKey.PublicKey(fromAddress);
     const destinationPublicKey = new PublicKey.PublicKey(toAddress);
-    let signSeed;
-    if (key.privateKeyHex) {
-        signSeed = privateKeyHexToQubicSeed(key.privateKeyHex);
-    }
-    else if (key.qubicBase26Seed) {
-        signSeed = key.qubicBase26Seed;
-    }
-    else {
-        throw new Error('Missing "key" param');
-    }
     const tx = new QubicTransaction.QubicTransaction()
         .setSourcePublicKey(sourcePublicKey)
         .setDestinationPublicKey(destinationPublicKey)
         .setAmount(new Long.Long(BigInt(value)))
         .setTick(tick);
-    await tx.build(signSeed);
+    await tx.build(qubicBase26Seed);
     const transactionId = tx.id;
     const transactionAsHex = uint8ArrayToHex(tx.getPackageData());
     return {
@@ -238,13 +204,48 @@ const transferQubic = async (params) => {
     };
 };
 
+const base26Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const hexToBase26 = (hexString) => {
+    let hexNum = BigInt(`0x${hexString}`);
+    let base26Str = '';
+    while (hexNum > 0n) {
+        let remainder = hexNum % 26n;
+        hexNum = hexNum / 26n;
+        // Convert BigInt remainder to a number before using it as an index
+        base26Str = base26Chars[Number(remainder)] + base26Str;
+    }
+    return base26Str;
+};
+
+const padBase26String = (input) => {
+    const paddedString = input.padStart(55, 'Z');
+    return paddedString;
+};
+
+/**
+ * Qubic uses base26 seeds as private keys, once we generate a private key through
+ * HD wallet derivation we turn the hex private key into a qubic seed.
+ * Then after that we use the qubic seed and we dont use the hex private key anymore.
+ *
+ * @param params {{
+ *  privateKeyHex: string
+ * }}
+ * @returns {string}
+ */
+const privatekeyHexToQubicBase26Seed = (params) => {
+    const { privateKeyHex } = params;
+    const privateKeyAsBase26 = hexToBase26(privateKeyHex);
+    const seed = padBase26String(privateKeyAsBase26);
+    return seed;
+};
+
 exports.getAddressFromPublicKey = getAddressFromPublicKey;
 exports.getIdentity = getIdentity;
 exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
 exports.isValidAddress = isValidAddress;
 exports.parseTransaction = parseTransaction;
-exports.privateKeyHexToQubicSeed = privateKeyHexToQubicSeed;
 exports.privateKeyToPublicKey = privateKeyToPublicKey;
+exports.privatekeyHexToQubicBase26Seed = privatekeyHexToQubicBase26Seed;
 exports.seedToPrivateKey = seedToPrivateKey;
 exports.transferQubic = transferQubic;
 //# sourceMappingURL=bundle.cjs.js.map

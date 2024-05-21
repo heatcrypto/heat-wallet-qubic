@@ -15,9 +15,7 @@ describe("transfer_qubic", () => {
       fromAddress: sourceId,
       toAddress: destId,
       value: "1000000",
-      key: {
-        qubicBase26Seed: signSeed,
-      },
+      qubicBase26Seed: signSeed,
       tick: 919191919,
     });
     expect(result.transactionId).toBe(

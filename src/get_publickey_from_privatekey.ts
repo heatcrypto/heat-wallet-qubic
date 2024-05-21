@@ -1,5 +1,3 @@
-import { hexToBase26 } from "./hex_to_base26";
-import { padBase26String } from "./pad_base26_string";
 import { getCryptoUtil, qubicHelper } from "./qubic";
 import { uint8ArrayToHex } from "./uint8array_to_hex";
 
@@ -9,21 +7,14 @@ import { uint8ArrayToHex } from "./uint8array_to_hex";
  * @returns {string}
  */
 export const getPublicKeyFromPrivateKey = async (params: {
-  privateKeyHex: string;
+  qubicBase26Seed: string;
 }) => {
-  const { privateKeyHex } = params;
-  const privateKeyAsBase26 = hexToBase26(privateKeyHex);
-  const seed = padBase26String(privateKeyAsBase26);
-  const privateKey = seedToPrivateKey(seed);
+  const { qubicBase26Seed } = params;
+  const privateKey = seedToPrivateKey(qubicBase26Seed);
   const publicKey = privateKeyToPublicKey(privateKey);
   const publicKeyHex = uint8ArrayToHex(publicKey);
   return publicKeyHex;
 };
-
-export function privateKeyHexToQubicSeed(privateKeyHex: string) {
-  const privateKeyAsBase26 = hexToBase26(privateKeyHex);
-  return padBase26String(privateKeyAsBase26);
-}
 
 export function seedToPrivateKey(seed: string): Uint8Array {
   const { K12 } = getCryptoUtil();
