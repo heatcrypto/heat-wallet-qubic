@@ -218,7 +218,7 @@ const transferQubic = async (params) => {
     };
 };
 
-const base26Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const base26Chars = 'abcdefghijklmnopqrstuvwxyz';
 const hexToBase26 = (hexString) => {
     let hexNum = BigInt(`0x${hexString}`);
     let base26Str = '';

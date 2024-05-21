@@ -1,4 +1,4 @@
-const base26Chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const base26Chars = 'abcdefghijklmnopqrstuvwxyz';
 export const hexToBase26 = (hexString: string): string => {
   let hexNum = BigInt(`0x${hexString}`);
   let base26Str = '';
