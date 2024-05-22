@@ -4,4 +4,5 @@ export * from './get_publickey_from_privatekey';
 export * from './parse_transaction';
 export * from './transfer_qubic';
 export * from './privatekey_hex_to_qubic_base26_seed';
+export * from './get_transaction_id';
 export * from './qubic';

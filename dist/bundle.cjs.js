@@ -253,10 +253,21 @@ const privatekeyHexToQubicBase26Seed = (params) => {
     return seed;
 };
 
+const getTransactionId = (params) => {
+    const { transactionAsHex } = params;
+    const { K12 } = getCryptoUtil();
+    const bytes = hexToUint8Array(transactionAsHex);
+    const digest = new Uint8Array(QubicDefinitions.QubicDefinitions.DIGEST_LENGTH);
+    K12(bytes, digest, QubicDefinitions.QubicDefinitions.DIGEST_LENGTH);
+    const humanReadable = getIdentity(digest, true);
+    return humanReadable;
+};
+
 exports.getAddressFromPublicKey = getAddressFromPublicKey;
 exports.getCryptoUtil = getCryptoUtil;
 exports.getIdentity = getIdentity;
 exports.getPublicKeyFromPrivateKey = getPublicKeyFromPrivateKey;
+exports.getTransactionId = getTransactionId;
 exports.isValidAddress = isValidAddress;
 exports.parseTransaction = parseTransaction;
 exports.privateKeyToPublicKey = privateKeyToPublicKey;

@@ -4,6 +4,7 @@ describe("is_valid_address", () => {
   describe("finds valid addresses", () => {
     const validAddresses = [
       "IGJQYTMFLVNIMEAKLANHKGNGZPFCFJGSMVOWMNGLWCZWKFHANHGCBYODMKBC",
+      "APSCCECDBJTEXEVXWHSJCRMKDPFCWOWWVITNTPIPWDSEUMKEUYLYJLTCYIYA"
     ];
     for (const address of validAddresses) {
       it(`should find ${address} to be valid`, async () => {
