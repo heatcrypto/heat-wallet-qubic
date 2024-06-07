@@ -9,6 +9,7 @@ var QubicDefinitions = require('qubic-ts-library/dist/QubicDefinitions');
 var PublicKey = require('qubic-ts-library/dist/qubic-types/PublicKey');
 var Long = require('qubic-ts-library/dist/qubic-types/Long');
 var QubicTransaction = require('qubic-ts-library/dist/qubic-types/QubicTransaction');
+var QubicTransferAssetPayload = require('qubic-ts-library/dist/qubic-types/transacion-payloads/QubicTransferAssetPayload');
 
 function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
@@ -140,14 +141,15 @@ const parseTransaction = (params) => {
     const { hex } = params;
     const bytes = hexToUint8Array(hex);
     const parsedTxn = parseUint8ArrayQubicTransaction(bytes);
-    const { sourceIdentity, destinationIdentity, amount, tick, inputType, inputSize, } = parsedTxn;
+    const { sourceIdentity, destinationIdentity, amount, tick, inputType, inputSize, assetTransfer, } = parsedTxn;
     return {
         sourceIdentity,
         destinationIdentity,
-        amount: amount.getNumber().toString(),
+        amount,
         tick,
         inputType,
         inputSize,
+        assetTransfer,
     };
 };
 function parseUint8ArrayQubicTransaction(data) {
@@ -170,13 +172,35 @@ function parseUint8ArrayQubicTransaction(data) {
     // Read the input size (16-bit integer)
     const inputSize = data[offset] + (data[offset + 1] << 8);
     offset += 2;
-    // TODO.. Add support for payload parsing (not needed at this stage)
-    // // Read the payload
-    // const payloadData = data.slice(offset, offset + inputSize);
-    // const payload = new DynamicPayload(inputSize); // Placeholder for actual payload handling
-    // payload.setPackageData(payloadData);
-    // transaction.setPayload(payload);
-    // offset += inputSize;
+    // Read the payload
+    const payloadData = data.slice(offset, offset + inputSize);
+    let assetTransfer;
+    if (inputType == QubicDefinitions.QubicDefinitions.QX_TRANSFER_ASSET_INPUT_TYPE) {
+        let payloadOffset = 0;
+        // Read the issuer public key
+        const issuerPublicKey = new PublicKey.PublicKey(payloadData.slice(payloadOffset, payloadOffset + 32));
+        payloadOffset += 32;
+        // Read the destination public key
+        const newOwnerAndPossessorPublicKey = new PublicKey.PublicKey(payloadData.slice(payloadOffset, payloadOffset + 32));
+        payloadOffset += 32;
+        // Read the asset name
+        const assetNameBytes = payloadData.slice(payloadOffset, payloadOffset + 8);
+        payloadOffset += 8;
+        // Read the numberOfUnits (assuming a 64-bit long)
+        const numberOfUnits = new Long.Long(new DataView(payloadData.buffer, payloadOffset, 8).getBigInt64(0, true));
+        payloadOffset += 8;
+        const textDecoder = new TextDecoder("utf-8");
+        const assetName = textDecoder
+            .decode(assetNameBytes)
+            .replace(/[\0\s]+$/g, "")
+            .trim();
+        assetTransfer = {
+            issuer: getIdentity(issuerPublicKey.getIdentity()),
+            newOwnerAndPocessor: getIdentity(newOwnerAndPossessorPublicKey.getIdentity()),
+            assetName,
+            numberOfUnits: numberOfUnits.getNumber().toString(),
+        };
+    }
     // // Read the signature (assuming fixed length, modify as necessary)
     // const signatureData = data.slice(offset); // Assume rest is signature
     // const signature = new Signature();
@@ -187,16 +211,16 @@ function parseUint8ArrayQubicTransaction(data) {
     return {
         sourceIdentity,
         destinationIdentity,
-        amount,
+        amount: amount.getNumber().toString(),
         tick,
         inputType,
         inputSize,
+        assetTransfer,
     };
 }
 
 /**
- * Transfers QU from one address to another, as key we accept either a hex privatekey as obtained
- * from a recovery seed - or a standard base26 Qubic seed.
+ * Transfers QU from one address to another.
  *
  * @param params
  */
@@ -209,6 +233,37 @@ const transferQubic = async (params) => {
         .setDestinationPublicKey(destinationPublicKey)
         .setAmount(new Long.Long(BigInt(value)))
         .setTick(tick);
+    await tx.build(qubicBase26Seed);
+    const transactionId = tx.id;
+    const transactionAsHex = uint8ArrayToHex(tx.getPackageData());
+    return {
+        transactionAsHex,
+        transactionId,
+    };
+};
+
+/**
+ * Transfers Qubic Asset from one address to another.
+ *
+ * @param params
+ */
+const transferAsset = async (params) => {
+    const { fromAddress, toAddress, value, qubicBase26Seed, tick, assetName, assetIssuer, } = params;
+    const sourcePublicKey = new PublicKey.PublicKey(fromAddress);
+    const destinationPublicKey = new PublicKey.PublicKey(toAddress);
+    const assetIssuerPublicKey = new PublicKey.PublicKey(assetIssuer);
+    const assetTransfer = new QubicTransferAssetPayload.QubicTransferAssetPayload()
+        .setIssuer(assetIssuerPublicKey)
+        .setNewOwnerAndPossessor(destinationPublicKey)
+        .setAssetName(assetName)
+        .setNumberOfUnits(new Long.Long(BigInt(value)));
+    const tx = new QubicTransaction.QubicTransaction()
+        .setSourcePublicKey(sourcePublicKey)
+        .setDestinationPublicKey(QubicDefinitions.QubicDefinitions.QX_ADDRESS)
+        .setAmount(QubicDefinitions.QubicDefinitions.QX_TRANSFER_ASSET_FEE)
+        .setTick(tick)
+        .setInputType(QubicDefinitions.QubicDefinitions.QX_TRANSFER_ASSET_INPUT_TYPE)
+        .setPayload(assetTransfer);
     await tx.build(qubicBase26Seed);
     const transactionId = tx.id;
     const transactionAsHex = uint8ArrayToHex(tx.getPackageData());
@@ -275,5 +330,6 @@ exports.privatekeyHexToQubicBase26Seed = privatekeyHexToQubicBase26Seed;
 exports.qubicHelper = qubicHelper;
 exports.qubicReady = qubicReady;
 exports.seedToPrivateKey = seedToPrivateKey;
+exports.transferAsset = transferAsset;
 exports.transferQubic = transferQubic;
 //# sourceMappingURL=bundle.cjs.js.map

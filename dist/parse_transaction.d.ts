@@ -7,4 +7,10 @@ export declare const parseTransaction: (params: {
     tick: number;
     inputType: number;
     inputSize: number;
+    assetTransfer?: {
+        issuer: string;
+        newOwnerAndPocessor: string;
+        assetName: string;
+        numberOfUnits: string;
+    };
 };

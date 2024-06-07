@@ -1,6 +1,6 @@
 {
   "name": "heat-wallet-qubic",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Wallet integration code for Qubic network",
   "main": "dist/bundle.cjs.js",
   "module": "dist/bundle.esm.js",
@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "test": "jest"
+    "test": "jest",
+    "test:asset": "jest ./test/transfer_asset.test.ts"
   },
   "repository": {
     "type": "git",
