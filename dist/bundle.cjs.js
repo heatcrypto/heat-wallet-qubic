@@ -287,7 +287,7 @@ const hexToBase26 = (hexString) => {
 };
 
 const padBase26String = (input) => {
-    const paddedString = input.padStart(55, 'Z');
+    const paddedString = input.padStart(55, 'z');
     return paddedString;
 };
 

@@ -30,6 +30,7 @@ describe("transfer_asset", () => {
 
     const parsed = parseTransaction({ hex: result.transactionAsHex });
 
+    expect(QubicDefinitions.QX_ADDRESS).toBe('BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARMID')
     expect(parsed.sourceIdentity).toBe(sourceId);
     expect(parsed.destinationIdentity).toBe(QubicDefinitions.QX_ADDRESS);
     expect(parsed.amount).toEqual(`${QubicDefinitions.QX_TRANSFER_ASSET_FEE}`);
